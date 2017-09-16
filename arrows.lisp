@@ -59,3 +59,35 @@ operator."
 (defun insert-last (arg surround)
   "Inserts ARG into the list form SURROUND as its last argument."
   (append surround (list arg)))
+
+(defmacro as-> (initial-form var &rest forms)
+  "Binds INITIAL-FORM to VAR, then successively each of FORMS to VAR, finally
+returns the last value of VAR."
+  `(let* ,(mapcar (lambda (form)
+                    (list var form))
+                  (cons initial-form forms))
+     ,var))
+
+(defun some-inserter (insert-fun)
+  (lambda (acc next)
+    (destructuring-bind (let* bindings var) acc
+      `(,let* (,@bindings
+               (,var (when ,var
+                       ,(funcall insert-fun var next))))
+         ,var))))
+
+(defun expand-some (initial-form forms insert-fun)
+  (let ((var (gensym "some")))
+    (reduce (some-inserter (simple-inserter insert-fun))
+            forms
+            :initial-value `(let* ((,var ,initial-form))
+                              ,var))))
+
+(defmacro some-> (initial-form &rest forms)
+  "Like ->, but short-circuits to NIL as soon as either INITIAL-FORM or any of
+FORMS return nil.  This is like all these forms are lifted to the maybe monad."
+  (expand-some initial-form forms #'insert-first))
+
+(defmacro some->> (initial-form &rest forms)
+  "Like some->, but with insertion behaviour as in ->>."
+  (expand-some initial-form forms #'insert-last))

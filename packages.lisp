@@ -1,9 +1,9 @@
 (defpackage :cl-arrows
   (:use #:common-lisp)
-  (:export
-    ;; thrushing macros
-    #:->
-    #:->>
-    ;; diamond wand/spear
-    #:-<>
-    #:-<>>))
+  (:export #:->
+           #:->>
+           #:-<>
+           #:-<>>
+           #:as->
+           #:some->
+           #:some->>))
