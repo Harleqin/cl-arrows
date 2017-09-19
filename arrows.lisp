@@ -6,18 +6,19 @@
         (funcall insert-fun acc next)
         (list next acc))))
 
-(defmacro -> (initial-form &rest forms)
-  "Inserts INITIAL-FORM as first argument into the first of FORMS, the result
-into the next, etc., before evaluation.  FORMS are treated as list designators."
-  (reduce (simple-inserter #'insert-first)
+(defun expand-arrow (initial-form forms insert-fun)
+  (reduce (simple-inserter insert-fun)
           forms
           :initial-value initial-form))
 
+(defmacro -> (initial-form &rest forms)
+  "Inserts INITIAL-FORM as first argument into the first of FORMS, the result
+into the next, etc., before evaluation.  FORMS are treated as list designators."
+  (expand-arrow initial-form forms #'insert-first))
+
 (defmacro ->> (initial-form &rest forms)
   "Like ->, but the forms are inserted as last argument instead of first."
-  (reduce (simple-inserter #'insert-last)
-          forms
-          :initial-value initial-form))
+  (expand-arrow initial-form forms #'insert-last))
 
 (defun diamond-inserter (insert-fun)
   (simple-inserter (lambda (acc next)
@@ -91,3 +92,52 @@ FORMS return nil.  This is like all these forms are lifted to the maybe monad."
 (defmacro some->> (initial-form &rest forms)
   "Like some->, but with insertion behaviour as in ->>."
   (expand-some initial-form forms #'insert-last))
+
+(defun cond-inserter (insert-fun)
+  (lambda (acc next)
+    (destructuring-bind (let* bindings var) acc
+      (destructuring-bind (test . forms) next
+        `(,let* (,@bindings
+                 (,var (if ,test
+                           ,(expand-arrow var forms insert-fun)
+                           ,var)))
+           ,var)))))
+
+(defun expand-cond (initial-form clauses insert-fun)
+  (let ((var (gensym "cond")))
+    (reduce (cond-inserter (simple-inserter insert-fun))
+            clauses
+            :initial-value `(let* ((,var ,initial-form))
+                              ,var))))
+
+(defmacro cond-> (initial-form &rest clauses)
+  "CLAUSES is a list of clauses similar to COND clauses, each clause comprising
+first a test form, then a body of further forms.  Cond-> evaluates INITIAL-FORM
+to a value, then for each clause whose test evaluates to true, pipes (as in ->)
+the value through each form in the body of the clause.  Note that unlike in
+COND, there is no short-circuiting: each clause gets tested regardless of the
+outcome of the clauses before."
+  (expand-cond initial-form clauses #'insert-first))
+
+(defmacro cond->> (initial-form &rest clauses)
+  "Like cond->, but with insertion behaviour as in ->>."
+  (expand-cond initial-form clauses #'insert-last))
+
+(defmacro ->* (&rest forms)
+  "Like ->, but the last form is used as initial form, then the remaining forms
+used as in ->.  This is intended for inversing the default in a ->> form.
+
+Example:
+
+    (->> 3
+         (/ 12)
+         (->* (/ 2)))
+    => 2"
+  `(-> ,@(append (last forms) (butlast forms))))
+
+(defmacro as->* (var &rest forms)
+  "Shorthand for the combination of ->* and as->: the last form is used for
+initial binding, then the remaining forms used as in as->.  This is intended for
+overriding the default in a ->> form."
+  `(as-> ,@(last forms) ,var
+         ,@(butlast forms)))
