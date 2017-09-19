@@ -72,4 +72,31 @@
                     (+ 5)
                     (member '(2 5 8 9))
                     third
-                    (* 9)))))
+                    (* 9))))
+  (is (null (some-> '(:a 1)
+                    (getf :b)
+                    1+))))
+
+(deftest test-some->> ()
+  (is (= (some->> '((:a . 3) (:b . 5))
+                  (assoc :a)
+                  cdr
+                  1+)
+         4))
+  (is (null (some->> '((:a . 3) (:b . 5))
+                     (assoc :c)
+                     cdr
+                     1+))))
+
+(deftest test-cond-> ()
+  (is (equal (labels ((strcat (&rest things)
+                        (with-output-to-string (s)
+                          (dolist (thing things)
+                            (when thing (princ thing s)))))
+                      (say (n)
+                        (cond-> nil
+                                ((zerop (mod n 3)) (strcat "Fizz"))
+                                ((zerop (mod n 5)) (strcat "Buzz"))
+                                (t (or (strcat n))))))
+               (mapcar #'say '(9 10 11 12 13 14 15)))
+             '("Fizz" "Buzz" "11" "Fizz" "13" "14" "FizzBuzz"))))
