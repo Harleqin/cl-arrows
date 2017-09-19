@@ -1,9 +1,9 @@
 (in-package #:cl-user)
 
-(defpackage #:cl-arrows-test
+(defpackage #:cl-arrows/test
   (:use #:cl #:cl-arrows #:hu.dwim.stefil))
 
-(in-package #:cl-arrows-test)
+(in-package #:cl-arrows/test)
 
 (defsuite* test-cl-arrows)
 
