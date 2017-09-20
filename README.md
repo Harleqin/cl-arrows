@@ -1,9 +1,67 @@
 # CL-Arrows
 
-Implements the `->` and `->>` threading macros in Clojure, as well as `-<>` and `-<>>`
-from the [swiss-arrows](https://github.com/rplevy/swiss-arrows) library.
+Implements threading macros, inspired by Clojure (both core and
+the [swiss-arrows](https://github.com/rplevy/swiss-arrows) library).
 
 This is an ASDF system providing the package `cl-arrows`.
+
+## Overview
+
+You get:
+
+- the basic “thrushing” arrows `->` and `->>`,
+- “diamond” arrows `-<>` and `-<>>`,
+- binding arrow `as->`,
+- “maybe” arrows `some->` and `some->>`,
+- conditional arrows `cond->` and `cond->>`, and
+- “double arrow cancellers” `->*` and `as->*`.
+
+As far as I see, `->*` and `as->*` are new.  Their purpose is to be nested in
+other threading forms to temporarily supplant their behaviour (see “Nesting”
+below).
+
+## Other arrow libraries
+
+- `arrow-macros`
+
+## Notable differences to Clojure and swiss-arrows
+
+- `Cond->` and `cond->>` use one additional paren nesting for the clauses, so
+  that each clause can contain multiple forms to thread/execute.
+
+- `-<>` and `-<>>` do not support literals to insert the `<>` placeholder.  The
+  placeholder really only works at the outermost level of the threaded forms.
+  The reason for this is mostly that Common Lisp does not have so many literal
+  syntax elements (by default) where it would make sense to do this kind of
+  insertion.  If you do need anything fancy, use `as->` or `as->*` for a real
+  lexical binding.
+
+## Notable differences to arrow-macros
+
+- `-<>` and `-<>>` do not use a code walker to find out whether a placeholder is
+  present in the next threaded form.  This reduces the dependencies of
+  `cl-arrows` (there are none at present).  Instead, the recommendation is to
+  use binding arrows `as->` or `as->*`, possibly nested (see below).
+
+## Nesting
+
+One useful idiom is to nest these arrows.  The basic example is to use `->>`
+inside `->`:
+
+    (-> deeply-nested-plist
+        (getf :foo)
+        (getf :bar)
+        (->> (mapcar #'reverse)))
+
+This inspired the discovery of `->*`, which enables the inverse nesting:
+
+    (->> deeply-nested-alist
+         (assoc :foo)
+         cdr
+         (assoc :bar)
+         cdr
+         (->* (mod 3))
+         (expt 2))
 
 ## Documentation
 
@@ -57,8 +115,3 @@ insertion is done like in `->>`.  Also known as diamond spear.
       (-<> (incf x)     ; (let ((r (incf x)))
            (+ <> <>)))  ;   (+ r r))
     => 8
-
-## Todo 
-
-Future versions _might_ include further ideas from rplevy's
-[swiss-arrows](https://github.com/rplevy/swiss-arrows).
