@@ -85,7 +85,7 @@ returns the last value of VAR."
                               ,var))))
 
 (defmacro some-> (initial-form &rest forms)
-  "Like ->, but short-circuits to NIL as soon as either INITIAL-FORM or any of
+  "Like ->, but short-circuits to nil as soon as either INITIAL-FORM or any of
 FORMS return nil.  This is like all these forms are lifted to the maybe monad."
   (expand-some initial-form forms #'insert-first))
 

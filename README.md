@@ -78,6 +78,12 @@ the next, etc., before evaluation.  FORMS are treated as list designators.
 Like `->`, but the forms are inserted as last argument instead of first.
 
 [macro]  
+`->*` _&rest_ forms => results
+
+Like `->`, but the last form is used as initial form, then the remainung forms
+as in `->`.  This is intended for inversing the default in a `->>` form.
+
+[macro]  
 `-<>` initial-form _&rest_ forms => results
 
 Like `->`, but if a form in FORMS has one or more symbols named `<>` as
@@ -90,6 +96,45 @@ known as diamond wand.
 
 Like `-<>`, but if a form in FORMS has no symbols named `<>` as top-level element,
 insertion is done like in `->>`.  Also known as diamond spear.
+
+[macro]  
+`as->` initial-form var _&rest_ forms => results
+
+Binds INITIAL-FORM to VAR, then successively each of FORMS to VAR, finally
+returns the last value of VAR.
+
+[macro]  
+`as->*` var _&rest_ forms => results
+
+Shorthand for the combination of `->*` and `as->`: the last form is used for
+initial binding, then the remaining forms used as in `as->`.  This is intended
+for overriding the default in a `->>` form.
+
+[macro]  
+`some->` initial-form _&rest_ forms
+
+Like `->`, but short-circuits to nil as soon as either INITIAL-FORM or any of
+FORMS return nil.  This is like all these forms are lifted to the maybe monad.
+
+[macro]  
+`some->>` initial-form _&rest_ forms
+
+Like `some->`, but with insertion behaviour as in `->>`.
+
+[macro]  
+`cond->` initial-form _&rest_ clauses
+
+CLAUSES is a list of clauses similar to COND clauses, each clause comprising
+first a test form, then a body of further forms.  `Cond->` evaluates
+INITIAL-FORM to a value, then for each clause whose test evaluates to true,
+pipes (as in `->`) the value through each form in the body of the clause.  Note
+that unlike in COND, there is no short-circuiting: each clause gets tested
+regardless of the outcome of the clauses before.
+
+[macro]  
+`cond->>` initial-form _&rest_ clauses
+
+Like `cond->`, but with insertion behaviour as in `->>`.
 
 ## Examples
 
