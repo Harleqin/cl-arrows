@@ -99,15 +99,15 @@ _[macro]_ Shorthand for the combination of `->*` and `as->`: the last form is
 used for initial binding, then the remaining forms used as in `as->`.  This is
 intended for overriding the default in a `->>` form.
 
-#### `some->` initial-form _&rest_ forms
+#### `some->` initial-form _&rest_ forms => results
 _[macro]_ Like `->`, but short-circuits to nil as soon as either INITIAL-FORM or
 any of FORMS return nil.  This is like all these forms are lifted to the maybe
 monad.
 
-#### `some->>` initial-form _&rest_ forms
+#### `some->>` initial-form _&rest_ forms => results
 _[macro]_ Like `some->`, but with insertion behaviour as in `->>`.
 
-#### `cond->` initial-form _&rest_ clauses
+#### `cond->` initial-form _&rest_ clauses => results
 _[macro]_ CLAUSES is a list of clauses similar to COND clauses, each clause
 comprising first a test form, then a body of further forms.  `Cond->` evaluates
 INITIAL-FORM to a value, then for each clause whose test evaluates to true,
@@ -115,7 +115,7 @@ pipes (as in `->`) the value through each form in the body of the clause.  Note
 that unlike in COND, there is no short-circuiting: each clause gets tested
 regardless of the outcome of the clauses before.
 
-#### `cond->>` initial-form _&rest_ clauses
+#### `cond->>` initial-form _&rest_ clauses => results
 _[macro]_ Like `cond->`, but with insertion behaviour as in `->>`.
 
 ## Examples
