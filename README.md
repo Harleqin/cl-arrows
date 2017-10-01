@@ -22,7 +22,7 @@ below).
 
 ## Other arrow libraries
 
-- `arrow-macros`
+- [`arrow-macros`](https://github.com/hipeta/arrow-macros)
 
 ## Notable differences to Clojure and swiss-arrows
 
@@ -38,10 +38,17 @@ below).
 
 ## Notable differences to arrow-macros
 
+- `Cond->` and `cond->>` use one additional paren nesting for the clauses, so
+  that each clause can contain multiple forms to thread/execute.
+
 - `-<>` and `-<>>` do not use a code walker to find out whether a placeholder is
-  present in the next threaded form.  This reduces the dependencies of
+  present in the next threaded form.  The placeholder only works at the
+  outermost level of the threaded forms.  This reduces the dependencies of
   `cl-arrows` (there are none at present).  Instead, the recommendation is to
   use binding arrows `as->` or `as->*`, possibly nested (see below).
+
+- There is no `some-<>` nor `some-<>>` yet.  Instead, you can use nested `as->`
+  or `as->*` forms (see below).
 
 ## Nesting
 
@@ -62,6 +69,20 @@ This inspired the discovery of `->*`, which enables the inverse nesting:
          cdr
          (->* (mod 3))
          (expt 2))
+
+Generally useful for overriding defaults are `as->` and `as->*`:
+
+    (-> 3
+        (as-> $
+              (< x $ y))
+        not)
+
+    (some->> 15
+             (as->* $
+                    (progn
+                      (format t debug-formatter $)
+                      $))
+             (/ 75))
 
 ## Documentation
 
