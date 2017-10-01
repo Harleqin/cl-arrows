@@ -145,7 +145,7 @@ Like `cond->`, but with insertion behaviour as in `->>`.
     (-> 3
         (expt 2))  ; insert as first argument
     => 9
-    
+
     (->> 3
          (expt 2))  ; insert as last argument
     => 8
@@ -160,3 +160,18 @@ Like `cond->`, but with insertion behaviour as in `->>`.
       (-<> (incf x)     ; (let ((r (incf x)))
            (+ <> <>)))  ;   (+ r r))
     => 8
+
+    (->> 3
+         (/ 12)         ; (/ 12 3) => 4
+         (->* (/ 2)))   ; (/ 4 2)  => 2
+    => 2
+
+    (flet ((say (n)
+             (cond->> nil
+                      ((zerop (mod n 3)) (cons "Fizz"))
+                      ((zerop (mod n 5)) (cons "Buzz"))
+                      (t (->* (or (list (princ-to-string n))))
+                         reverse
+                         (apply #'concatenate 'string)))))
+      (mapcar #'say '(9 10 11 12 13 14 15)))
+    => ("Fizz" "Buzz" "11" "Fizz" "13" "14" "FizzBuzz")

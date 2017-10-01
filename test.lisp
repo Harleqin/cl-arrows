@@ -100,3 +100,14 @@
                                 (t (or (strcat n))))))
                (mapcar #'say '(9 10 11 12 13 14 15)))
              '("Fizz" "Buzz" "11" "Fizz" "13" "14" "FizzBuzz"))))
+
+(deftest test-cond->> ()
+  (is (equal (flet ((say (n)
+                      (cond->> nil
+                               ((zerop (mod n 3)) (cons "Fizz"))
+                               ((zerop (mod n 5)) (cons "Buzz"))
+                               (t (->* (or (list (princ-to-string n))))
+                                  reverse
+                                  (apply #'concatenate 'string)))))
+               (mapcar #'say '(9 10 11 12 13 14 15)))
+             '("Fizz" "Buzz" "11" "Fizz" "13" "14" "FizzBuzz"))))
