@@ -1,3 +1,7 @@
+# --- ARCHIVED, OBSOLETE ---
+
+This repository is archived.  Use [`arrows`](https://github.com/Harleqin/arrows) from Quicklisp instead.
+
 # CL-Arrows
 
 Implements threading macros, inspired by Clojure (both core and
